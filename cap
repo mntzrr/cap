@@ -1,0 +1,157 @@
+#!/usr/bin/env bash
+
+PASTE_ALL=n
+
+########################
+#### MAGIC COMMANDS ####
+########################
+
+cp="cp -f --preserve --strip-trailing-slashes"
+
+savepoint="/tmp/cap-savepoint-$(whoami).txt"
+
+if ! [ -f "$savepoint" ]; then
+    if ! touch "$savepoint"; then
+        echo 'Could not create save file.'
+        echo 'Exiting...'
+        exit 1
+    fi
+else
+    sed -i '/^$/d' "$savepoint"
+fi
+
+copy() {
+    for item in $1; do
+        item="$(realpath "$item")"
+        if [ -e "$item" ] && ! grep -q  "$item" "$savepoint" ; then
+            echo "$item" >> "$savepoint"
+        fi
+    done
+}
+
+paste() {
+    local lines="$(wc -l < "$savepoint")"
+    local position="$1"
+    position=$(((lines + 1) - position))
+     
+    if echo "$position" | grep -q '[0-9]'; then
+
+        if [ "$position" -lt '1' ] || [ "$position" -ge "$lines" ]; then
+            position="$lines"
+        fi
+    else
+        position="$lines"
+    fi
+
+    local item="$(sed -n "${position}p" "$savepoint")"
+
+    if [ -f "$item" ]; then
+        $cp "$item" "$(pwd)"
+
+    elif [ -d "$item" ]; then
+        $cp -r "$item" "$(pwd)"
+    fi
+
+    if [ "$PASTE_ALL" = 'n' ]; then
+        sed -i "${position}d" "$savepoint"
+        echo "$item" >> "$savepoint"
+    fi
+}
+
+paste-all() {
+    local i="$(wc -l < "$savepoint")"
+    i=$((i - 1))
+    
+    PASTE_ALL='y'
+    while [ "$i" -gt '0' ]; do
+        printf "\r%s %d" 'Remaining:' "$i"
+        paste "$i"
+        i=$((i - 1))
+    done
+    PASTE_ALL='n'
+
+    echo -e '\rRemaining:    0'
+}
+
+list-items() {
+    local i="$(wc -l < "$savepoint")" 
+    
+    for item in $(cat "$savepoint"); do
+        echo "$i $item"
+        i=$((i - 1))
+    done
+}
+
+
+clear-list() {
+    echo "" > "$savepoint"
+}
+
+usage() {
+    echo "Usage: cap [OPTION] [FILE...]"
+    echo "Flag any files and directories and paste in current working directory."
+    echo
+    echo "Options:"
+    echo
+    echo " -l, --list           list all flagged"
+    echo " -a, --all            paste all flagged"
+    echo " -p [INDEX]           paste only most recently flagged or a specific item in the list"
+    echo " --clear              clear all flagged"
+    echo " -h, --help           print this manual"
+    echo
+    echo "Examples:"
+    echo
+    echo " cap *                flag everything in current directory for copy"
+    echo " cap -p               paste most recently flagged"
+    echo " cap -p 5             paste the 5th entry in the list"
+    echo " cap --all            paste all flagged files and directories"
+}
+
+version() {
+    echo 'cap 1.0.0'
+}
+
+options=$(getopt -n "cap" -o aClph --long all,clear-list,list,help,version -- "$@")
+eval set -- "$options"
+while :; do
+    case $1 in
+    -a|--all)
+        paste-all
+        exit 0
+        ;;
+	-l|--list)
+        list-items
+        exit 0
+	    ;;
+	-p)
+        paste "$3"
+        exit 0
+	    ;;
+	-h|--help)
+	    usage
+	    exit 0
+	    ;;
+    -C|--clear)
+        clear-list
+        exit 0
+        ;;
+    --version)
+        version
+        exit 0
+        ;;
+    --)
+        shift
+        if [ -z "$*" ]; then
+            paste "1"
+        else
+            copy "$*"
+        fi
+        exit 0
+        ;;
+	*)
+	    printf "Unknown option: (%s).\n" "$1"
+        exit 1
+	    ;;
+    esac
+done
+eval set -- "$@"
