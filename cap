@@ -34,7 +34,7 @@ paste() {
     local position="$1"
     position=$(((lines + 1) - position))
      
-    if echo "$position" | grep -q '[0-9]'; then
+    if echo "$position" | grep -qE '^[0-9]+$'; then
 
         if [ "$position" -lt '1' ] || [ "$position" -ge "$lines" ]; then
             position="$lines"
