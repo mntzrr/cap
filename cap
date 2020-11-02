@@ -76,11 +76,24 @@ paste-all() {
 delete() {
     local lines="$(wc -l < "$savepoint")"
     local position="$1"
-
+    
     if [ "$lines" -lt 1 ]; then
         echo 'List is empty.'
         exit 0
 
+    fi
+
+    if echo "$position" | grep -qE '^[0-9]+\-[0-9]+$'; then
+        local start=$(echo "$position" | awk -F- '{print $1}')
+        local end=$(echo "$position" | awk -F- '{print $2}')
+
+        if [ "$start" -gt 0 ] && [ "$end" -le "$lines" ]; then
+            start=$(((lines + 1) - start))
+            end=$(((lines + 1) - end))
+
+            sed -i "${end},${start}d" "$savepoint"
+            exit 0
+        fi
     elif [ -z "$position" ] || ! echo "$position" | grep -qE '^[0-9]+$'; then
         echo "Expected an index between 1-$lines, got ($position)"
         exit 1
@@ -113,7 +126,7 @@ usage() {
     echo " -l, --list           list all flagged"
     echo " -a, --all            paste all flagged"
     echo " -p [INDEX]           paste only most recently flagged or a specific item in the list"
-    echo " -d INDEX             remove a flagged item from the list"
+    echo " -d INDEX|RANGE       remove a flagged item from the list or all items within range"
     echo " --clear              clear all flagged"
     echo " -h, --help           print this manual"
     echo
@@ -126,7 +139,7 @@ usage() {
 }
 
 version() {
-    echo 'cap 1.1.0'
+    echo 'cap 1.2.0'
 }
 
 options=$(getopt -n "cap" -o aCdlph --long all,clear,list,help,version -- "$@")

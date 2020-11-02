@@ -41,10 +41,18 @@ You can clear the list by using the  `--clear` option (or shorthand `-C`), or if
 cap -d 5
 ```
 
+You can also delete from a range using the same option.
+
+```bash
+cap -d 5-10
+```
+
+Deletes all items from the 5th index to the 10th (inclusive).
+
 
 
 ```
-CAP(1)                                                                                 User Commands                                                                                CAP(1)
+CAP(1)                                                                                User Commands                                                                                CAP(1)
 
 NAME
        cap - flag files and directories for copy
@@ -65,8 +73,8 @@ OPTIONS
        -p [INDEX]
               paste only most recently flagged or a specific item in the list
 
-       -d INDEX
-              remove a flagged item from the list
+       -d INDEX|RANGE
+              remove a flagged item from the list or all items within range
 
        --clear
               clear all flagged
@@ -76,10 +84,10 @@ OPTIONS
 
 EXAMPLES
        cap *  
-       		flag everything in current directory for copy
+       		  flag everything in current directory for copy
 
        cap -p 
-       		paste most recently flagged
+       		  paste most recently flagged
 
        cap -p 5
               paste the 5th entry in the list
@@ -87,7 +95,7 @@ EXAMPLES
        cap --all
               paste all flagged files and directories
 
-cap 1.1.0                                                                              November 2020                                                                                CAP(1)
+cap 1.2.0                                                                             November 2020                                                                                CAP(1)
 
 ```
 
