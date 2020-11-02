@@ -35,12 +35,16 @@ The pasted item will be moved to index 1 in the list. This way, you don’t have
 cap
 ```
 
-You can clear the list by running `--clear` (or shorthand `-C`).
+You can clear the list by using the  `--clear` option (or shorthand `-C`), or if you want to delete a specific item in the list only, use the `-d INDEX` option.
+
+```bash
+cap -d 5
+```
 
 
 
 ```
-CAP(1)                                                                                User Commands                                                                                CAP(1)
+CAP(1)                                                                                 User Commands                                                                                CAP(1)
 
 NAME
        cap - flag files and directories for copy
@@ -61,6 +65,9 @@ OPTIONS
        -p [INDEX]
               paste only most recently flagged or a specific item in the list
 
+       -d INDEX
+              remove a flagged item from the list
+
        --clear
               clear all flagged
 
@@ -69,10 +76,10 @@ OPTIONS
 
 EXAMPLES
        cap *  
-        	  flag everything in current directory for copy
+       		flag everything in current directory for copy
 
        cap -p 
-       		  paste most recently flagged
+       		paste most recently flagged
 
        cap -p 5
               paste the 5th entry in the list
@@ -80,7 +87,7 @@ EXAMPLES
        cap --all
               paste all flagged files and directories
 
-cap 1.0.0                                                                             November 2020                                                                                CAP(1)
+cap 1.1.0                                                                              November 2020                                                                                CAP(1)
 
 ```
 
