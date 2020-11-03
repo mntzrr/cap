@@ -93,7 +93,7 @@ EXAMPLES
               paste the 5th entry in the list
 
        cap -p 7-9
-              paste the all items from the 7th to 9th (inclusive) index
+              paste all items from the 7th to 9th (inclusive) index
 
        cap --all
               paste all flagged files and directories
