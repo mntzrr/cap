@@ -98,6 +98,7 @@ EXAMPLES
        cap --all
               paste all flagged files and directories
 
-cap 1.3.0                                                            November 2020
+cap 1.3.1                                                            November 2020
+
 ```
 
