@@ -52,7 +52,7 @@ Deletes all items from the 5th index to the 10th (inclusive).
 
 
 ```
-CAP(1)                                                                                User Commands                                                                                CAP(1)
+CAP(1)                                                               User Commands
 
 NAME
        cap - flag files and directories for copy
@@ -70,11 +70,11 @@ OPTIONS
        -a, --all
               paste all flagged
 
-       -p [INDEX]
-              paste only most recently flagged or a specific item in the list
+       -p [INDEX|RANGE]
+              paste only most recently flagged or a specific item in the list or all items within a range
 
        -d INDEX|RANGE
-              remove a flagged item from the list or all items within range
+              remove a flagged item from the list or all items within a range
 
        --clear
               clear all flagged
@@ -92,10 +92,12 @@ EXAMPLES
        cap -p 5
               paste the 5th entry in the list
 
+       cap -p 7-9
+              paste the all items from the 7th to 9th (inclusive) index
+
        cap --all
               paste all flagged files and directories
 
-cap 1.2.0                                                                             November 2020                                                                                CAP(1)
-
+cap 1.3.0                                                            November 2020
 ```
 
