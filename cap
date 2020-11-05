@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-PASTE_ALL=n
-
 ########################
 #### MAGIC COMMANDS ####
 ########################
@@ -54,27 +52,10 @@ paste() {
         echo "Ignoring $item..."
     fi
 
-    if [ "$PASTE_ALL" = 'n' ]; then
+    if ! [ "$ALL" = 'y' ]; then
         sed -i "${position}d" "$savepoint"
         echo "$item" >> "$savepoint"
     fi
-}
-
-paste-all() {
-    exit-if-list-empty
-    
-    local i="$lines"
-    i=$((i - 1))
-    
-    PASTE_ALL='y'
-    while [ "$i" -gt '0' ]; do
-        printf "\r%s %5d" 'Remaining:' "$i"
-        paste "$i"
-        i=$((i - 1))
-    done
-    PASTE_ALL='n'
-
-    printf "\r%s %5d\n" 'Remaining:' '0'
 }
 
 paste-range() {
@@ -159,15 +140,16 @@ usage() {
 }
 
 version() {
-    echo 'cap 1.4.0'
+    echo 'cap 1.5.0'
 }
 
-options=$(getopt -n "cap" -o ald::phC --long all,clear,list,help,version -- "$@")
+options=$(getopt -n "cap" -o ald::p::hC --long all,clear,list,help,version -- "$@")
 eval set -- "$options"
 while :; do
     case $1 in
     -a|--all)
-        paste-all
+        ALL=y
+        paste-range "1-$lines"
         exit 0
         ;;
 	-l|--list)
@@ -188,8 +170,12 @@ while :; do
         exit 0
         ;;
 	-p)
+        set -x
+        shift
         if echo "$3" | grep -qE '^[0-9]+\-[0-9]+$'; then
             paste-range "$3"
+        elif echo "$3" | grep -qE '^([0-9]+\-)$'; then
+            paste-range "$3$lines"
         elif echo "$3" | grep -qE '^[0-9]+$'; then
             paste "$3"
         else
