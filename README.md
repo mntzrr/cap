@@ -35,25 +35,25 @@ The pasted item will be moved to index 1 in the list. This way, you don’t have
 cap
 ```
 
-You can clear the list by using the  `--clear` option (or shorthand `-C`), or if you want to delete a specific item in the list only, use the `-d INDEX` option.
+You can clear the list by using the  `--clear` option (or shorthand `-C`), or if you want to unflag a specific item in the list only, use the `-d INDEX` option.
 
 ```bash
 cap -d 5
 ```
 
-You can also delete from a **range** using the same option.
+You can also unflag from a **range** using the same option.
 
 ```bash
 cap -d 5-10
 ```
 
-Deletes all items from the 5th index to the 10th (inclusive).
+Unflags all items from the 5th index to the 10th (inclusive).
 
 ```bash
 cap -d 5-
 ```
 
-Deletes all items, starting from the 5th index and higher.
+Unflags all items, starting from the 5th index and higher.
 
 
 
@@ -104,7 +104,7 @@ EXAMPLES
        cap --all
               paste all flagged files and directories
 
-cap 1.4.0                                                                             November 2020
+cap 1.5.0                                                                             November 2020
 
 ```
 

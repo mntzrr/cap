@@ -6,8 +6,13 @@
 
 cp="cp -f --preserve --strip-trailing-slashes"
 
+########################
+### GLOBAL VARIABLES ###
+########################
+
 savepoint="/tmp/cap-savepoint-$(whoami).txt"
 lines=$(wc -l < "$savepoint")
+
 
 if ! [ -f "$savepoint" ]; then
     if ! touch "$savepoint"; then
@@ -126,7 +131,7 @@ usage() {
     echo " -l, --list           list all flagged"
     echo " -a, --all            paste all flagged"
     echo " -p [INDEX|RANGE]     paste recently flagged, a specific item in the list or all items within a range"
-    echo " -d [INDEX|RANGE]     remove recently flagged, a specific flagged item from the list or all items within a range"
+    echo " -d [INDEX|RANGE]     unflag recently flagged, a specific item from the list or all items within a range"
     echo " --clear              clear all flagged"
     echo " -h, --help           print this manual"
     echo
@@ -137,6 +142,7 @@ usage() {
     echo " cap -p 5             paste the 5th entry in the list"
     echo " cap -p 7-9           paste all items from the 7th to 9th (inclusive) index"
     echo " cap --all            paste all flagged files and directories"
+    echo " cap -d 7-            unflag all items from the 7th index and higher (inclusive)"
 }
 
 version() {
