@@ -170,7 +170,6 @@ while :; do
         exit 0
         ;;
 	-p)
-        set -x
         shift
         if echo "$3" | grep -qE '^[0-9]+\-[0-9]+$'; then
             paste-range "$3"
