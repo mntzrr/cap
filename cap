@@ -9,6 +9,7 @@ PASTE_ALL=n
 cp="cp -f --preserve --strip-trailing-slashes"
 
 savepoint="/tmp/cap-savepoint-$(whoami).txt"
+lines=$(wc -l < "$savepoint")
 
 if ! [ -f "$savepoint" ]; then
     if ! touch "$savepoint"; then
@@ -20,9 +21,15 @@ else
     sed -i '/^$/d' "$savepoint"
 fi
 
+exit-if-list-empty() {
+    if [ "$lines" -lt 1 ]; then
+        echo 'List is empty.'
+        exit 0
+    fi
+}
+
 copy() {
-    for item in $1; do
-        item="$(realpath "$item")"
+    for item in $(realpath $1); do
         if [ -e "$item" ] && ! grep -q  "$item" "$savepoint" ; then
             echo "$item" >> "$savepoint"
         fi
@@ -30,14 +37,10 @@ copy() {
 }
 
 paste() {
-    local lines="$(wc -l < "$savepoint")"
+    exit-if-list-empty
+    
     local position="$1"
     position=$(((lines + 1) - position))
-
-    if [ "$lines" -lt 1 ]; then
-        echo 'List is empty.'
-        exit 0
-    fi
 
     local item="$(sed -n "${position}p" "$savepoint")"
 
@@ -46,6 +49,9 @@ paste() {
 
     elif [ -d "$item" ]; then
         $cp -r "$item" "$(pwd)"
+
+    else
+        echo "Ignoring $item..."
     fi
 
     if [ "$PASTE_ALL" = 'n' ]; then
@@ -55,7 +61,9 @@ paste() {
 }
 
 paste-all() {
-    local i="$(wc -l < "$savepoint")"
+    exit-if-list-empty
+    
+    local i="$lines"
     i=$((i - 1))
     
     PASTE_ALL='y'
@@ -70,7 +78,7 @@ paste-all() {
 }
 
 paste-range() {
-    local lines="$(wc -l < "$savepoint")"
+    exit-if-list-empty
     
     local start=$(echo "$1" | awk -F- '{print $1}')
     local end=$(echo "$1" | awk -F- '{print $2}')
@@ -84,14 +92,11 @@ paste-range() {
 }
 
 delete() {
-    local lines="$(wc -l < "$savepoint")"
-    local position="$1"
-    
-    if [ "$lines" -lt 1 ]; then
-        echo 'List is empty.'
-        exit 0
+    exit-if-list-empty
 
-    elif [ -z "$position" ]; then
+    local position="$1"
+
+    if [ -z "$position" ]; then
         echo "Expected an index between 1-$lines, got ($position)"
         exit 1
     fi
@@ -101,13 +106,7 @@ delete() {
 }
 
 delete-range() {
-    local lines="$(wc -l < "$savepoint")"
-
-    if [ "$lines" -lt 1 ]; then
-        echo 'List is empty.'
-        exit 0
-
-    fi
+    exit-if-list-empty
 
     local start=$(echo "$1" | awk -F- '{print $1}')
     local end=$(echo "$1" | awk -F- '{print $2}')
@@ -121,6 +120,8 @@ delete-range() {
 }
 
 list-items() {
+    exit-if-list-empty
+
     local i="$(wc -l < "$savepoint")" 
     
     for item in $(cat "$savepoint"); do
@@ -136,14 +137,15 @@ clear-list() {
 
 usage() {
     echo "Usage: cap [OPTION] [FILE...]"
+    echo
     echo "Flag any files and directories and paste in current working directory."
     echo
     echo "Options:"
     echo
     echo " -l, --list           list all flagged"
     echo " -a, --all            paste all flagged"
-    echo " -p [INDEX|RANGE]     paste only most recently flagged or a specific item in the list or all items within a range"
-    echo " -d INDEX|RANGE       remove a flagged item from the list or all items within a range"
+    echo " -p [INDEX|RANGE]     paste recently flagged, a specific item in the list or all items within a range"
+    echo " -d [INDEX|RANGE]     remove recently flagged, a specific flagged item from the list or all items within a range"
     echo " --clear              clear all flagged"
     echo " -h, --help           print this manual"
     echo
@@ -157,10 +159,10 @@ usage() {
 }
 
 version() {
-    echo 'cap 1.3.1'
+    echo 'cap 1.4.0'
 }
 
-options=$(getopt -n "cap" -o aCdlph --long all,clear,list,help,version -- "$@")
+options=$(getopt -n "cap" -o ald::phC --long all,clear,list,help,version -- "$@")
 eval set -- "$options"
 while :; do
     case $1 in
@@ -173,19 +175,26 @@ while :; do
         exit 0
 	    ;;
     -d)
+        shift
         if echo "$3" | grep -qE '^[0-9]+\-[0-9]+$'; then
             delete-range "$3"
-        else
+        elif echo "$3" | grep -qE '^([0-9]+\-)$'; then
+            delete-range "$3$lines"
+        elif echo "$3" | grep -qE '^[0-9]+$'; then
             delete "$3"
+        else
+            delete 1
         fi
         exit 0
         ;;
 	-p)
-    if echo "$3" | grep -qE '^[0-9]+\-[0-9]+$'; then
-        paste-range "$3"
-    else
-        paste "$3"
-    fi
+        if echo "$3" | grep -qE '^[0-9]+\-[0-9]+$'; then
+            paste-range "$3"
+        elif echo "$3" | grep -qE '^[0-9]+$'; then
+            paste "$3"
+        else
+            paste 1
+        fi
         exit 0
 	    ;;
 	-h|--help)
