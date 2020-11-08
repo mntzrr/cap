@@ -11,8 +11,6 @@ cp="cp -f --preserve --strip-trailing-slashes"
 ########################
 
 savepoint="/tmp/cap-savepoint-$(whoami).txt"
-lines=$(wc -l < "$savepoint")
-
 
 if ! [ -f "$savepoint" ]; then
     if ! touch "$savepoint"; then
@@ -23,6 +21,8 @@ if ! [ -f "$savepoint" ]; then
 else
     sed -i '/^$/d' "$savepoint"
 fi
+
+lines=$(wc -l < "$savepoint")
 
 exit-if-list-empty() {
     if [ "$lines" -lt 1 ]; then
