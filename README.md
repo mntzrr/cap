@@ -6,7 +6,17 @@ If you want to copy your files and directories but don't know yet the destinatio
 
 ```bash
 git clone https://gitlab.com/montazar/cap.git
-sudo cp cap/cap /usr/local/bin
+cd cap
+sudo cp cap /usr/local/bin
+chmod 644 _cap
+
+# Bash/ZSH completion
+if ! [ -d "$ZSH/completions" ]; then
+	mkdir "$ZSH/completions"
+fi
+
+cp _cap "$ZSH/completions"
+sudo cp _cap /usr/share/bash-completion/completions
 ```
 
 ## Manual
@@ -80,9 +90,9 @@ OPTIONS
               paste recently flagged, a specific item in the list or all items within a range
 
        -d [INDEX|RANGE]
-              remove recently flagged, a specific flagged item from the list or all items within a range
+              unflag recently flagged, a specific item from the list or all items within a range
 
-       --clear
+       -C, --clear
               clear all flagged
 
        -h, --help
@@ -104,7 +114,17 @@ EXAMPLES
        cap --all
               paste all flagged files and directories
 
-cap 1.5.0                                                                             November 2020
+       cap -d 7-
+              unflag all items from the 7th index and higher (inclusive)
 
+cap 1.5.0                                                                             November 2020
+```
+
+## Uninstall
+
+```bash
+sudo rm /usr/local/bin/cap
+rm "$ZSH/completions/_cap"
+sudo rm /usr/share/bash-completion/completions/_cap
 ```
 

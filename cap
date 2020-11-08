@@ -132,7 +132,7 @@ usage() {
     echo " -a, --all            paste all flagged"
     echo " -p [INDEX|RANGE]     paste recently flagged, a specific item in the list or all items within a range"
     echo " -d [INDEX|RANGE]     unflag recently flagged, a specific item from the list or all items within a range"
-    echo " --clear              clear all flagged"
+    echo " -C, --clear          clear all flagged"
     echo " -h, --help           print this manual"
     echo
     echo "Examples:"

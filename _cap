@@ -1,0 +1,44 @@
+_cap() {
+    COMPREPLY=()
+    curr="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    short_opts="-p -d -l -C -h"
+    long_opts="--list --clear --help"
+    
+    # Do not suggest the same filename more than once if it has already been added.
+    files="$(/usr/bin/env ls | awk '{print $0}' | sed -e 's/\\/\\\\/g' -e 's/(/\\(/g' -e 's/)/\\)/g')" 
+    files="$(echo  "$(echo "${COMP_WORDS[@]}" | tr '[:space:]' '\n')" "$files" | tr '[:space:]' '\n' | sort | uniq -u)"
+    files=$(echo "$files" | sed -e 's/\\/\\\\/g' -e 's/(/\\(/g' -e 's/)/\\)/g')
+
+    # Matches all of the available options.
+    # We do not want to issue any file suggestions at this point since they cannot be combined with any of the options.
+    stop_suggestions="\-([lCh]|[pd]( [0-9])?|\-clear|\-list\-help)"
+
+    if [ "${#COMP_WORDS[@]}" -lt 2 ]; then
+        COMPREPLY+=("$(compgen -W "$(echo "$files" | sed 's/\t//g')" -- "${curr}")")
+
+    elif [ "${#COMP_WORDS[@]}" -lt 3 ]; then
+        if [[ ${curr} == --* ]]; then
+            COMPREPLY+=("$(compgen -W "$long_opts" -- "${curr}")")
+
+        elif [[ ${curr} == -* ]]; then
+            COMPREPLY+=("$(compgen -W "$short_opts" -- "${curr}")")
+
+        elif [[ ${prev} == -d ]] || [[ ${prev} == -p ]] && cap -l | grep -qE '^[0-9]+'; then
+            COMPREPLY+=("$(compgen -W "1 $(cap -l | head -1 | awk '{print $1}' | sed 's/\t//')" -- "${curr}")")
+
+        elif ! echo "${COMP_WORDS[@]}" | grep -qE "$stop_suggestions"; then
+            COMPREPLY+=("$(compgen -W "$(echo "$files" | sed 's/\t//g')" -- "${curr}")")
+        fi
+
+    elif ! echo "${COMP_WORDS[@]}" | grep -qE "$stop_suggestions"; then
+        COMPREPLY+=("$(compgen -W "$(echo "$files" | sed 's/\t//g' )" -- "${curr}")")
+    fi
+
+}
+
+complete -F _cap cap
+
+# ex: filetype=sh
+
