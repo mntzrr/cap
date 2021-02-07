@@ -117,7 +117,7 @@ EXAMPLES
        cap -d 7-
               unflag all items from the 7th index and higher (inclusive)
 
-cap 1.5.0                                                                             November 2020
+cap 1.5.2                                                                             February 2021
 ```
 
 ## Uninstall
