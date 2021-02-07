@@ -24,31 +24,6 @@ fi
 
 lines=$(wc -l < "$savepoint")
 
-function inform() {
-    color="$1"
-    message="$2"
-    ret=1
-
-    case $color in
-        "OK")
-            COLOR="32m[ OK ]"
-            ret=0
-            ;;
-        "NOTICE")
-            COLOR="33m[ NOTICE ]"
-            ret=0
-            ;;
-        "WARNING")
-            COLOR="31m[ WARNING ]"
-            ret=1
-            ;;
-    esac
-
-    echo -e "\e[1;${COLOR} \e[0m${message}"
-    return $ret
-}
-
-
 exit-if-list-empty() {
     if [ "$lines" -lt 1 ]; then
         echo 'List is empty.'
