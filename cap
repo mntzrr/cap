@@ -4,7 +4,7 @@
 #### MAGIC COMMANDS ####
 ########################
 
-cp="cp -f --preserve --strip-trailing-slashes"
+cp="cp -f --verbose --preserve --strip-trailing-slashes"
 
 ########################
 ### GLOBAL VARIABLES ###
@@ -23,6 +23,31 @@ else
 fi
 
 lines=$(wc -l < "$savepoint")
+
+function inform() {
+    color="$1"
+    message="$2"
+    ret=1
+
+    case $color in
+        "OK")
+            COLOR="32m[ OK ]"
+            ret=0
+            ;;
+        "NOTICE")
+            COLOR="33m[ NOTICE ]"
+            ret=0
+            ;;
+        "WARNING")
+            COLOR="31m[ WARNING ]"
+            ret=1
+            ;;
+    esac
+
+    echo -e "\e[1;${COLOR} \e[0m${message}"
+    return $ret
+}
+
 
 exit-if-list-empty() {
     if [ "$lines" -lt 1 ]; then
@@ -146,10 +171,17 @@ usage() {
 }
 
 version() {
-    echo 'cap 1.5.1'
+    echo 'cap 1.5.2'
 }
 
-options=$(getopt -n "cap" -o ald::p::hC --long all,clear,list,help,version -- "$@")
+options=$(getopt -n "cap" -o ald::p::hC --long all,clear,list,help,version -- "$@" 2>/dev/null)
+
+if [ "$?" -gt 0 ]; then
+    echo -e '\e[1;31m[ WARNING ]\e[0m Unknown option encountered.\n'
+    usage
+    exit 1
+fi
+
 eval set -- "$options"
 while :; do
     case $1 in
@@ -209,11 +241,6 @@ while :; do
         fi
         exit 0
         ;;
-	*)
-	    printf "Unknown option: (%s).\n" "$1"
-        usage
-        exit 1
-	    ;;
     esac
 done
 eval set -- "$@"
